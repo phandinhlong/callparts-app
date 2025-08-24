@@ -102,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
                         SlideTransition(
                           position: _freshAnimation,
                           child: const Text(
-                            'Auto',
+                            'Call',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
