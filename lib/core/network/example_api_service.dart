@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import 'api_client.dart';
 import 'api_service.dart';
 import 'api_response.dart';
@@ -300,7 +302,7 @@ class ApiServiceExample {
     
     // 4. Add interceptors to client
     for (final interceptor in interceptors) {
-      client.addInterceptor(interceptor);
+      client.addInterceptor(interceptor as Interceptor);
     }
     
     // 5. Create API services
@@ -388,7 +390,7 @@ class ApiErrorHandlingExample {
           } else if (error is BusinessException) {
             print('Business error: ${error.message}');
           } else {
-            print('Unknown error: ${error.message}');
+            print('Unknown error: ${error?.message}');
           }
           
           // Log error for debugging

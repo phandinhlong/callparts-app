@@ -57,9 +57,10 @@ class ApiResponse<T> {
     final errorCode = json['error_code'] ?? json['code'];
     final metadata = json['metadata'] ?? json['meta'];
     final statusCode = json['status_code'];
+    final data = null;
 
     if (success && json['data'] != null) {
-      T? data;
+      T data;
       if (fromJson != null) {
         data = fromJson(json['data'] as Map<String, dynamic>);
       } else {

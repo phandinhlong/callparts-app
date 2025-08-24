@@ -10,7 +10,7 @@ class DatabaseException extends AppException {
     this.table,
     super.code,
     super.details,
-  });
+  }) : super('');
 
   factory DatabaseException.connectionFailed() {
     return const DatabaseException(

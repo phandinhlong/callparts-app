@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import '../error/errors.dart';
 
@@ -269,7 +270,7 @@ class CacheInterceptor implements ApiInterceptor {
         // Return cached response
         throw DioException(
           requestOptions: options,
-          type: DioExceptionType.other,
+          type: DioExceptionType.cancel,
           error: 'Cached response',
         );
       }
