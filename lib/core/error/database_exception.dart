@@ -80,3 +80,4 @@ class DatabaseException extends AppException {
     );
   }
 }
+

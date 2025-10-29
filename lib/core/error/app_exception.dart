@@ -8,3 +8,4 @@ abstract class AppException implements Exception {
   @override
   String toString() => 'AppException: $message${code != null ? ' (Code: $code)' : ''}';
 }
+

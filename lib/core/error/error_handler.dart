@@ -108,3 +108,4 @@ class ErrorHandler {
     return error is BusinessException;
   }
 }
+

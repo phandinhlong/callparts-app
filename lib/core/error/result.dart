@@ -102,3 +102,4 @@ extension ResultExtensions<T> on Result<T> {
     return data;
   }
 }
+

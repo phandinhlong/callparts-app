@@ -221,3 +221,4 @@ class EnvironmentConfig {
            environment.toLowerCase() == 'stg';
   }
 }
+
