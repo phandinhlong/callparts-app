@@ -3,9 +3,10 @@ import 'package:callparts/presentation/pages/authentication/AuthWidgets/auth_tab
 import 'package:callparts/presentation/pages/authentication/forgot_password_screen.dart';
 import 'package:callparts/presentation/pages/authentication/signup_screen.dart';
 import 'package:callparts/presentation/pages/home/home_page.dart';
-import 'package:callparts/presentation/widgets/text1.dart';
 import 'package:callparts/presentation/widgets/custom_button.dart';
 import 'package:callparts/presentation/widgets/custom_text_field.dart';
+import 'package:callparts/presentation/widgets/text1.dart';
+import 'package:callparts/service/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,21 +18,22 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
+  final AuthService authService = AuthService();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background color with News Wave text and image
           Container(
             width: double.infinity,
-            color: AppColors.buttonColor, // Replace with your specific color
+            color: AppColors.buttonColor,
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(height: 100), // Add some spacing from the top
-
+                SizedBox(height: 100),
                 Text1(
                   text1: 'Auto Parts App',
                   color: Colors.white,
@@ -40,7 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-          // Main content
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -64,14 +65,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           size: 24,
                         ),
                         const SizedBox(height: 20),
-                        const CustomTextField(
+                        CustomTextField(
                           label: 'Username',
                           icon: Icons.person,
+                          controller: usernameController,
                         ),
-                        const CustomTextField(
+                        CustomTextField(
                           label: 'Password',
                           icon: Icons.lock,
                           icon2: Icons.visibility,
+                          controller: passwordController,
                         ),
                         const SizedBox(height: 5),
                         Row(
@@ -110,12 +113,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 20),
                         CustomButton(
                             text: 'Login',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomePage()),
+                            onTap: () async {
+                              bool success = await authService.login(
+                                usernameController.text,
+                                passwordController.text,
                               );
+                              print(success);
+                              if (success) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomePage()),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(AuthService().message ??
+                                        'Login failed'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             }),
                         const SizedBox(height: 20),
                         const Text('or continue with'),
