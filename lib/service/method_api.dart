@@ -1,93 +1,84 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
-var urlMain= "http://10.0.2.2";
-var urlAPI= "$urlMain/api/";
+var urlMain = "http://callparts1.vn";
+var urlAPI = "$urlMain/api/";
 
-
-Map<String, String> getApiHeaders(String? token) {
+Options getApiHeaders(String? token) {
   final headers = {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Authorization': 'Bearer $token',
   };
 
   if (token != null && token.isNotEmpty) {
     headers['Authorization'] = 'Bearer $token';
   }
-  return headers;
+  return Options(headers: headers);
 }
 
+Options defaultHeaders() => Options(headers: {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+});
 
-Map<String, String> defaultHeaders() =>
-    {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
+final Dio _dio = Dio();
 
-Future<http.Response> postRequest({
+Future<Response> postRequest({
   required String url,
   required String endpoint,
   required Map<String, dynamic> requestData,
-  Map<String, String>? headers,
+  Options? options,
   Duration timeout = const Duration(seconds: 30),
 }) async {
-  print(url+endpoint);
-  final response = await http
-      .post(
-    Uri.parse('$url$endpoint'),
-    headers: headers ?? {'Content-Type': 'application/json'},
-    body: jsonEncode(requestData),
-  )
-      .timeout(timeout);
-
+  final response = await _dio.post(
+    '$url$endpoint',
+    data: jsonEncode(requestData),
+    options: options ?? Options(headers: {'Accept': 'application/json'}),
+  ).timeout(timeout);
+  print(response.data);
+  print(response.statusCode);
   return response;
 }
 
-Future<http.Response> getRequest({
+Future<Response> getRequest({
   required String url,
   required String endpoint,
-  Map<String, String>? headers,
+  Options? options,
   Duration timeout = const Duration(seconds: 30),
 }) async {
-  final response = await http
-      .get(
-    Uri.parse('$url$endpoint'),
-    headers: headers ?? defaultHeaders(),
-  )
-      .timeout(timeout);
+  final response = await _dio.get(
+    '$url$endpoint',
+    options: options ?? defaultHeaders(),
+  ).timeout(timeout);
 
   return response;
 }
-Future<http.Response> putRequest({
+
+Future<Response> putRequest({
   required String url,
   required String endpoint,
   required Map<String, dynamic> requestData,
-  Map<String, String>? headers,
+  Options? options,
   Duration timeout = const Duration(seconds: 30),
 }) async {
-  final response = await http
-      .put(
-    Uri.parse('$url$endpoint'),
-    headers: headers ?? {'Content-Type': 'application/json'},
-    body: jsonEncode(requestData),
-  )
-      .timeout(timeout);
+  final response = await _dio.put(
+    '$url$endpoint',
+    data: jsonEncode(requestData),
+    options: options ?? Options(headers: {'Content-Type': 'application/json'}),
+  ).timeout(timeout);
 
   return response;
 }
-Future<http.Response> deleteRequest({
+
+Future<Response> deleteRequest({
   required String url,
   required String endpoint,
-  Map<String, String>? headers,
+  Options? options,
   Duration timeout = const Duration(seconds: 30),
 }) async {
-  final response = await http
-      .delete(
-    Uri.parse('$url$endpoint'),
-    headers: headers ?? {'Content-Type': 'application/json'},
-  )
-      .timeout(timeout);
+  final response = await _dio.delete(
+    '$url$endpoint',
+    options: options ?? Options(headers: {'Content-Type': 'application/json'}),
+  ).timeout(timeout);
 
   return response;
 }
