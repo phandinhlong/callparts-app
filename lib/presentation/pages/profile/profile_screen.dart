@@ -1,4 +1,5 @@
 import 'package:callparts/presentation/pages/profile/past_orders.dart';
+import 'package:callparts/presentation/pages/profile/paymentMethods/payment_method.dart';
 import 'package:callparts/presentation/pages/profile/user_information.dart';
 import 'package:callparts/presentation/pages/profile/manageAddress/address_book_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:callparts/core/constants/app_colors.dart';
 import 'package:callparts/presentation/widgets/custom_app_bar.dart';
 import 'change_password.dart';
 import 'edit_profile.dart';
-import 'PaymentMethods/payment_method.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
