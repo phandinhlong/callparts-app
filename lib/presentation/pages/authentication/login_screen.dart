@@ -19,9 +19,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
   final AuthService authService = AuthService();
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailTextController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  late String _errorMessage = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.7,
+                height: MediaQuery.of(context).size.height * 0.72,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -63,18 +63,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text1(
                           text1: 'Login',
                           size: 24,
-                        ),
+                        ),if (_errorMessage.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _errorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 14),
+                            ),
+                          ),
                         const SizedBox(height: 20),
                         CustomTextField(
-                          label: 'Username',
-                          icon: Icons.person,
-                          controller: usernameController,
+                          label: 'Email',
+                          icon: Icons.email,
+                          controller: emailTextController,
                         ),
                         CustomTextField(
                           label: 'Password',
                           icon: Icons.lock,
                           icon2: Icons.visibility,
                           controller: passwordController,
+                          obscureText: true,
                         ),
                         const SizedBox(height: 5),
                         Row(
@@ -100,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const ForgotPasswordScreen()),
+                                      const ForgotPasswordScreen()),
                                 );
                               },
                               child: const Text1(
@@ -114,25 +123,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomButton(
                             text: 'Login',
                             onTap: () async {
+                              setState(() {
+                                _errorMessage = '';
+                              });
                               bool success = await authService.login(
-                                usernameController.text,
+                                emailTextController.text,
                                 passwordController.text,
                               );
-                              print(success);
                               if (success) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => HomePage()),
                                 );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(AuthService().message ??
-                                        'Login failed'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                              }else{
+                                setState(() {
+                                  _errorMessage = authService.message_error;
+                                });
                               }
                             }),
                         const SizedBox(height: 20),
@@ -160,19 +167,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Text("Don't have an account? "),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignUpScreen()),
+                                Navigator.of(context).push(
+                                  PageRouteBuilder(
+                                    transitionDuration: const Duration(milliseconds: 300),
+                                    pageBuilder: (context, animation, secondaryAnimation) => const SignUpScreen(),
+                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                      const beginOffset = Offset(1.0, 0.0);
+                                      const endOffset = Offset.zero;
+                                      var tween = Tween(begin: beginOffset, end: endOffset).chain(CurveTween(curve: Curves.easeInOut));
+                                      var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+                                      return SlideTransition(
+                                        position: animation.drive(tween),
+                                        child: FadeTransition(
+                                          opacity: animation.drive(fadeTween),
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 );
-                                // Navigate to signup screen
                               },
                               child: const Text(
                                 'Sign Up',
                                 style: TextStyle(
                                   color: Color(0xFF1A73E8),
-                                  // Replace with your specific color
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
