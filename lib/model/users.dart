@@ -9,18 +9,18 @@ class User {
 
   User(
       {required this.email,
-      required this.avatar,
-      required this.name,
-      required this.gender,
-      required this.phone});
+        required this.avatar,
+        required this.name,
+        required this.gender,
+        required this.phone});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      email: json['email'] ?? '',
-      avatar: json['avatar'] ?? '',
-      name: json['name'] ?? '',
-      gender: json['gender'] ?? '',
-      phone: json['phone'] ?? '',
+      email: (json['email'] ?? '').toString(),
+      avatar: (json['avatar'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      gender: (json['gender'] ?? '').toString(),
+      phone: (json['phone'] ?? '').toString(),
     );
   }
 
@@ -34,4 +34,15 @@ class User {
     };
   }
 
+  @override
+  String toString() {
+    return '''
+User Info:
+  Name: $name
+  Email: $email
+  Gender: $gender
+  Phone: $phone
+  Avatar: $avatar
+''';
+  }
 }
