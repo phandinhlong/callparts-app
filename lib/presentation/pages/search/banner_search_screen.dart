@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:callparts/core/constants/app_colors.dart';
 import 'package:callparts/model/product.dart';
 import 'package:callparts/service/product/product_service.dart';
+import 'package:callparts/service/method_api.dart';
 import 'package:callparts/presentation/pages/product/product_detail_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../widgets/common/collapsible_search_widget.dart';
 
@@ -317,16 +319,17 @@ class SearchScreenState extends State<SearchScreen> {
                 ),
                 child: Center(
                   child: product.images.isNotEmpty
-                      ? Image.network(
-                          product.images.first,
+                      ? CachedNetworkImage(
+                          imageUrl: urlImg + product.images.first,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.image_not_supported,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            );
-                          },
+                          placeholder: (context, url) => const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
                         )
                       : Icon(
                           Icons.image_not_supported,

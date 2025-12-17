@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:callparts/model/product.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -466,18 +467,21 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           SizedBox(
             height: 300,
             width: double.infinity,
-            child: Image.network(
-              urlImg+images[_selectedImageIndex],
+            child: CachedNetworkImage(
+              imageUrl: urlImg+images[_selectedImageIndex],
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 80,
-                    color: Colors.grey,
-                  ),
-                );
-              },
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              ),
+              errorWidget: (context, url, error) => const Center(
+                child: Icon(
+                  Icons.image_not_supported,
+                  size: 80,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
 
@@ -513,15 +517,18 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          urlImg+images[index],
+                        child: CachedNetworkImage(
+                          imageUrl: urlImg+images[index],
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey,
-                            );
-                          },
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),

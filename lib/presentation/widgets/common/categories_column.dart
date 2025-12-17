@@ -1,5 +1,6 @@
 import 'package:callparts/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CategoryItem extends StatelessWidget {
   final String imagePath;
@@ -32,31 +33,19 @@ class CategoryItem extends StatelessWidget {
               height: 130,
               width: 130,
               child: isNetworkImage
-                  ? Image.network(
-                      imageUrl,
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.category,
-                          color: AppColors.buttonHome.withOpacity(0.5),
-                          size: 28,
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            strokeWidth: 2,
-                            color: AppColors.buttonHome,
-                          ),
-                        );
-                      },
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.category,
+                        color: AppColors.buttonHome.withOpacity(0.5),
+                        size: 28,
+                      ),
                     )
                   : Image.asset(
                       imagePath,

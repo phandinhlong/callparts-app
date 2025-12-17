@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:callparts/service/slider/slider_service.dart';
 import 'package:callparts/service/method_api.dart';
 import 'package:callparts/core/constants/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:callparts/model/product.dart';
 import 'package:callparts/presentation/widgets/common/categories_widget.dart';
 import 'package:callparts/presentation/widgets/common/compact_search_widget.dart';
@@ -337,49 +338,37 @@ class _HomePageState extends State<HomePage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                imageUrl,
+              CachedNetworkImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.cover,
                 color: Colors.black.withOpacity(0.25),
                 colorBlendMode: BlendMode.darken,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[300],
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                      SizedBox(height: 8),
+                      Text(
+                        'Lỗi tải ảnh',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(12),
-                child: Image.network(
-                  imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
                   fit: BoxFit.contain,
-                ),
-              ),
-              Positioned.fill(
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return const SizedBox();
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.broken_image,
-                              color: Colors.grey, size: 40),
-                          SizedBox(height: 8),
-                          Text(
-                            'Lỗi tải ảnh',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
                 ),
               ),
             ],

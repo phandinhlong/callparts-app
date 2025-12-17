@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:callparts/model/product.dart';
 import 'package:callparts/presentation/pages/product/product_detail_page.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -52,7 +53,18 @@ class ProductCard extends StatelessWidget {
               child: Container(
                 color: const Color(0xFFF8F9FA),
                 child: product.images.isNotEmpty
-                    ? Image.network(urlImg+product.images.first)
+                    ? CachedNetworkImage(
+                        imageUrl: urlImg+product.images.first,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                        ),
+                      )
                     : const Center(
                         child: Icon(Icons.image_not_supported, color: Colors.grey),
                       ),

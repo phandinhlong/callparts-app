@@ -6,6 +6,7 @@ import 'package:callparts/data/models/category.dart';
 import 'package:callparts/service/category/category_services.dart';
 import 'package:callparts/presentation/widgets/common/product_card.dart';
 import 'package:callparts/presentation/widgets/common/collapsible_search_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 enum SortOption {
   nameAZ('Tên A đến Z'),
@@ -393,10 +394,15 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
                       ),
                     ),
                     child: isNetworkImage
-                        ? Image.network(
-                            imageUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
                                 const Icon(Icons.category, size: 30),
                           )
                         : Image.asset(
