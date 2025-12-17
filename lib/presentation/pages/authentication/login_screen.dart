@@ -18,10 +18,81 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
+  bool _isGoogleLoading = false;
+  bool _isFacebookLoading = false;
   final AuthService authService = AuthService();
   final TextEditingController emailTextController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   late String _errorMessage = '';
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isGoogleLoading = true;
+    });
+
+    try {
+      bool success = await authService.loginGoogle();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = authService.message_error;
+            _isGoogleLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isGoogleLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isFacebookLoading = true;
+    });
+
+    try {
+      bool success = await authService.loginFacebook();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = authService.message_error;
+            _isFacebookLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isFacebookLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                      const ForgotPasswordScreen()),
+                                          const ForgotPasswordScreen()),
                                 );
                               },
                               child: const Text1(
@@ -134,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => HomePage()),
+                                      builder: (context) => const HomePage()),
                                 );
                               }else{
                                 setState(() {
@@ -145,18 +216,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 20),
                         const Text('or continue with'),
                         const SizedBox(height: 20),
-                        const Row(
+                        Row(
                           children: [
                             AuthTab(
                               image: 'images/icons8-facebook-48.png',
                               text: 'Facebook',
+                              onTap: _isFacebookLoading ? null : _handleFacebookSignIn,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 12,
                             ),
                             AuthTab(
                               image: 'images/icons8-google-48.png',
                               text: 'Google',
+                              onTap: _isGoogleLoading ? null : _handleGoogleSignIn,
                             ),
                           ],
                         ),
@@ -205,6 +278,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+          if (_isGoogleLoading || _isFacebookLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -26,6 +26,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
   late AuthService auth = AuthService();
   String _errorMessage = '';
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isFacebookLoading = false;
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isGoogleLoading = true;
+    });
+
+    try {
+      bool success = await auth.loginGoogle();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = auth.message_error;
+            _isGoogleLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isGoogleLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isFacebookLoading = true;
+    });
+
+    try {
+      bool success = await auth.loginFacebook();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = auth.message_error;
+            _isFacebookLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isFacebookLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,65 +206,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _isLoading
                               ? const CircularProgressIndicator()
                               : CustomButton(
-                              text: 'Signup',
-                              onTap: () async {
-                                setState(() {
-                                  _isLoading = true;
-                                  _errorMessage = '';
-                                });
-                                try {
-                                  bool success = await auth.register(
-                                    email: _emailText.text,
-                                    password: _passwordText.text,
-                                    repass: _confirmText.text,
-                                    name: _nameText.text,
-                                    phone: _phoneText.text,
-                                  );
-                                  if (success) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                          const LoginScreen()),
-                                    );
-                                  } else {
+                                  text: 'Signup',
+                                  onTap: () async {
                                     setState(() {
-                                      _errorMessage = auth.message_error;
+                                      _isLoading = true;
+                                      _errorMessage = '';
                                     });
-                                  }
-                                } catch (e) {
-                                  setState(() {
-                                    _errorMessage = auth.message_error;
-                                  });
-                                } finally {
-                                  setState(() {
-                                    _isLoading = false;
-                                  });
-                                }
-                              }),
+                                    try {
+                                      bool success = await auth.register(
+                                        email: _emailText.text,
+                                        password: _passwordText.text,
+                                        repass: _confirmText.text,
+                                        name: _nameText.text,
+                                        phone: _phoneText.text,
+                                      );
+                                      if (success) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.'),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginScreen()),
+                                        );
+                                      } else {
+                                        setState(() {
+                                          _errorMessage = auth.message_error;
+                                        });
+                                      }
+                                    } catch (e) {
+                                      setState(() {
+                                        _errorMessage = auth.message_error;
+                                      });
+                                    } finally {
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    }
+                                  }),
                           const SizedBox(height: 20),
                           const Text('or continue with'),
                           const SizedBox(height: 20),
-                          const Row(
+                          Row(
                             children: [
                               AuthTab(
                                 image: 'images/icons8-facebook-48.png',
                                 text: 'Facebook',
+                                onTap: _isFacebookLoading ? null : _handleFacebookSignIn,
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 12,
                               ),
                               AuthTab(
                                 image: 'images/icons8-google-48.png',
                                 text: 'Google',
+                                onTap: _isGoogleLoading ? null : _handleGoogleSignIn,
                               ),
                             ],
                           ),
@@ -251,7 +323,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                 ),
-              )
+              ),
+              if (_isGoogleLoading || _isFacebookLoading)
+                Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

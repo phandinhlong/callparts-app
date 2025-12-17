@@ -93,7 +93,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                  const ResetPasswordScreen(),
+                                  ResetPasswordScreen(email: _emailTextController.text),
                                 ),
                               );
                             }

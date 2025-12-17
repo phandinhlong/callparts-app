@@ -1,6 +1,8 @@
+import 'package:callparts/data/models/product.dart';
+
 class AfterMarketCode {
   final int id;
-  final int productId;
+  final Product productId;
   final String from;
   final String afterMarketCode;
 

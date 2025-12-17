@@ -120,7 +120,7 @@ class FavoriteScreenState extends State<FavoriteScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text11(
-                                text2: products[index - 1].name,
+                                text2: products[index - 1].productName,
                                 color: Colors.white,
                               ),
                               Icon(Icons.check,
@@ -145,12 +145,31 @@ class FavoriteScreenState extends State<FavoriteScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showFilterBottomSheet,
-        backgroundColor: AppColors.text3Color,
-        child: const Icon(
-          Icons.filter_list,
-          color: Colors.white,
+      backgroundColor: AppColors.bgColor,
+      appBar: AppBar(
+        backgroundColor: AppColors.buttonColor,
+        elevation: 4,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        ),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Yêu thích',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -159,86 +178,90 @@ class FavoriteScreenState extends State<FavoriteScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomAppBar(text: 'Favorite Products', text1: ''),
-              const SizedBox(height: 20),
               Expanded(
                 child: AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) {
                     return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         return SlideTransition(
                           position: _slideFromLeftAnimation,
-                          child: Card(
-                            color: Colors.white,
-                            elevation: 3,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.strokeColor),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.asset(
+                                    products[index].images.first,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Image.asset(
-                                        products[index].imagePath,
-                                        width: 80,
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Column(
+                                      Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text1(
-                                            text1: products[index].name,
+                                          Expanded(
+                                            child: Text(
+                                              products[index].productName,
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.text1Color,
+                                                height: 1.3,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                          Text1(
-                                            text1: products[index].price,
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.favorite,
+                                            color: AppColors.text3Color,
+                                            size: 22,
                                           ),
-                                          // Row(
-                                          //   children: [
-                                          //     Text1(
-                                          //       text1: products[index].price,
-                                          //     ),
-                                          //
-                                          //   ],
-                                          // ),
-                                          // const Row(
-                                          //   children: [
-                                          //     Icon(
-                                          //       Icons.star,
-                                          //       color: AppColors.text3Color,
-                                          //       size: 20,
-                                          //     ),
-                                          //     Icon(
-                                          //       Icons.star,
-                                          //       color: AppColors.text3Color,
-                                          //       size: 20,
-                                          //     ),
-                                          //     Icon(
-                                          //       Icons.star,
-                                          //       color: AppColors.text3Color,
-                                          //       size: 20,
-                                          //     ),
-                                          //     Icon(
-                                          //       Icons.star,
-                                          //       color: AppColors.text3Color,
-                                          //       size: 20,
-                                          //     ),
-                                          //     Text1(text1: ' 4.3')
-                                          //   ],
-                                          // )
                                         ],
                                       ),
-                                      const Spacer(),
-                                      const Icon(Icons.favorite,
-                                          color: Colors.red),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        products[index].price.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.text3Color,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         );

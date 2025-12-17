@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:callparts/core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 
 class CustomTextField extends StatefulWidget {
   final String label;
@@ -10,13 +10,13 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController? controller;
   final void Function(String)? onChanged;
 
-  const CustomTextField({
-    super.key,
+  const CustomTextField({super.key,
     required this.label,
     this.icon,
     this.icon2,
     this.height = 42,
     this.obscureText = false,
+
     this.controller,
     this.onChanged,
   });
@@ -27,11 +27,13 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   late FocusNode _focusNode;
+  late bool _obscureText=false;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    _obscureText = widget.obscureText;
   }
 
   @override
@@ -55,26 +57,39 @@ class _CustomTextFieldState extends State<CustomTextField> {
         controller: widget.controller,
         onChanged: widget.onChanged,
         focusNode: _focusNode,
-        obscureText: widget.obscureText,
+        obscureText: _obscureText,
         style: const TextStyle(
             color: Colors.black54, fontSize: 16, fontWeight: FontWeight.w400),
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: widget.label,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: -3),
+          const EdgeInsets.symmetric(horizontal: 20, vertical: -3),
           hintStyle: const TextStyle(
               color: Colors.black54, fontSize: 16, fontWeight: FontWeight.w400),
-          prefixIcon: Icon(
+          prefixIcon: widget.icon != null
+              ? Icon(
             widget.icon,
             size: 20,
             color: Colors.black54,
-          ),
-          suffixIcon: Icon(
-            widget.icon2,
-            size: 20,
-            color: Colors.black54,
-          ),
+          )
+              : null,
+          suffixIcon: widget.obscureText
+              ? IconButton(
+            icon: Icon(
+              _obscureText
+                  ? (widget.icon2 ?? Icons.visibility)
+                  : Icons.visibility_off,
+              size: 20,
+              color: Colors.black54,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+          )
+              : null,
         ),
       ),
     );

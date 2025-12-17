@@ -1,131 +1,202 @@
+import 'package:callparts/service/method_api.dart';
 import 'package:flutter/material.dart';
-
-import 'package:callparts/core/constants/app_colors.dart';
-import 'package:callparts/presentation/pages/home/starter_battery_details_screen.dart';
-import '../text1.dart';
-import '../text2.dart';
+import 'package:callparts/model/product.dart';
+import 'package:callparts/presentation/pages/product/product_detail_page.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
-  final String imagePath;
-  final String name;
-  final String price;
+  final Product product;
 
   const ProductCard({
-    super.key,
-    required this.imagePath,
-    required this.name,
-    required this.price,
-  });
+    Key? key,
+    required this.product,
+  }) : super(key: key);
+
+  String _formatPrice(double price) {
+    final formatter = NumberFormat('#,###', 'vi_VN');
+    return '${formatter.format(price.toInt())}đ';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const StarterBatteryDetailsScreen(),
+            builder: (context) => ProductDetailPage(product: product),
           ),
         );
       },
-      child: Card(
-        elevation: 3,
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const StarterBatteryDetailsScreen(),
-                    ),
-                  );
-                },
-                child: SizedBox(
-                  height: 80,
-                  width: double.infinity,
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            topLeft: Radius.circular(10)),
-                        child: Image.asset(
-                          width: 120,
-                          imagePath,
-                          fit: BoxFit.fill,
-                        ),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image Section
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: AspectRatio(
+              aspectRatio: 1.0,
+              child: Container(
+                color: const Color(0xFFF8F9FA),
+                child: product.images.isNotEmpty
+                    ? Image.network(urlImg+product.images.first)
+                    : const Center(
+                        child: Icon(Icons.image_not_supported, color: Colors.grey),
                       ),
-                      Positioned(
-                        right: 2,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    const StarterBatteryDetailsScreen()));
-                          },
-                          child: const CircleAvatar(
-                            radius: 13,
-                            backgroundColor: AppColors.buttonColor,
-                            child: Icon(
-                              Icons.favorite_border,
-                              size: 17,
-                              color: Colors.white,
+              ),
+            ),
+          ),
+          
+          // Content Section
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Name
+                  Text(
+                    product.productName.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Color(0xFF2D3436),
+                      height: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+                  
+                  Row(
+                    children: [
+                      const Text(
+                        'Mã: ',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF3E0),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            product.pCode.toString(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFE67E22),
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
-                ),
-              ),
-              const Divider(
-                color: Colors.grey,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text1(text1: name, size: 15, color: AppColors.text1Color),
-                    const Spacer(),
-                    Text1(text1: price, color: AppColors.text1Color),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: AppColors.text3Color, size: 17),
-                        Icon(Icons.star, color: AppColors.text3Color, size: 17),
-                        Icon(Icons.star, color: AppColors.text3Color, size: 17),
-                        Icon(Icons.star, color: AppColors.text3Color, size: 17),
-                        Text2(text2: ' (3.5)', color: AppColors.text2Color),
-                      ],
+                  const SizedBox(height: 3),
+                  
+                  // Brand
+                  Row(
+                    children: [
+                      const Text(
+                        'Hãng: ',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Expanded(
+                        child: Text(
+                          product.manufacturer?.manufacturerName ?? 'N/A',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  
+                  // Views
+                  Row(
+                    children: [
+                      const Icon(Icons.visibility_outlined, size: 13, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${product.numberOfViewed ?? 0}',
+                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Price
+                  Text(
+                    _formatPrice(product.price),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD32F2F),
                     ),
-                    Spacer(),
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundColor: AppColors.buttonColor,
-                      child: Icon(
-                        Icons.add,
-                        size: 15,
-                        color: AppColors.buttonTextColor,
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // Add to Cart Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 30,
+                    child: ElevatedButton(
+                      onPressed: () {
+                         ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${product.productName} đã thêm vào giỏ'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF007BFF),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      child: const Text(
+                        'Thêm vào giỏ',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
+      ),
       ),
     );
   }

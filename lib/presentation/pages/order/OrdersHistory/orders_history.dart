@@ -21,12 +21,50 @@ class OrdersHistory extends StatefulWidget {
   OrdersHistoryState createState() => OrdersHistoryState();
 }
 
+class _StatusFilterChip extends StatelessWidget {
+  const _StatusFilterChip({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color:
+              isActive ? AppColors.text3Color.withOpacity(0.12) : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isActive ? AppColors.text3Color : AppColors.strokeColor,
+          ),
+        ),
+        child: Text2(
+          text2: label,
+          color: isActive ? AppColors.text3Color : AppColors.text1Color,
+        ),
+      ),
+    );
+  }
+}
+
 class OrdersHistoryState extends State<OrdersHistory>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideFromLeftAnimation;
   late Animation<Offset> _slideFromRightAnimation;
+
+  String _selectedFilter =
+      'processing'; // processing, delivering, completed, cancelled
 
   @override
   void initState() {
@@ -72,6 +110,33 @@ class OrdersHistoryState extends State<OrdersHistory>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.bgColor,
+      appBar: AppBar(
+        backgroundColor: AppColors.buttonColor,
+        elevation: 4,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        ),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Đơn hàng',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
@@ -83,353 +148,200 @@ class OrdersHistoryState extends State<OrdersHistory>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CustomAppBar(text: 'Orders History', text1: ''),
-                    const SizedBox(height: 34),
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const ActiveOrders()));
-                      },
-                      child: SlideTransition(
-                        position: _slideFromLeftAnimation,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text1(
-                              text1: 'Active Orders',
-                              size: 14,
-                            ),
-                            Text11(
-                              text2: 'See All',
-                              color: AppColors.text3Color,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SlideTransition(
-                      position: _slideFromLeftAnimation,
-                      child: SizedBox(
-                        height: 175,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                width: 250,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Image.asset(
-                                          products[index].imagePath,
-                                          width: 80,
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text1(
-                                                text1: products[index].name,
-                                              ),
-                                              const Text2(
-                                                  text2:
-                                                      'May 23, 4.3PM Delivered'),
-                                              Text1(
-                                                text1: products[index].price,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: CustomOutlinedButton(
-                                                text: 'Cancel Order',
-                                                onTap: () {}),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Flexible(
-                                            child: CustomButton(
-                                                text: 'Track Order',
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const SelectLocationScreen(),
-                                                    ),
-                                                  );
-                                                }),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
+                    Row(
+                      children: [
+                        _StatusFilterChip(
+                          label: 'Đang xử lý',
+                          isActive: _selectedFilter == 'processing',
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = 'processing';
+                            });
                           },
                         ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const CompletedOrders()));
-                      },
-                      child: SlideTransition(
-                        position: _slideFromRightAnimation,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text1(
-                              text1: 'Completed Orders',
-                              size: 14,
-                            ),
-                            Text11(
-                              text2: 'See All',
-                              color: AppColors.text3Color,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SlideTransition(
-                      position: _slideFromRightAnimation,
-                      child: SizedBox(
-                        height: 175,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: products1.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                width: 250,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Image.asset(
-                                          products1[index].imagePath,
-                                          width: 80,
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text1(
-                                                text1: products1[index].name,
-                                              ),
-                                              const Text2(
-                                                  text2:
-                                                      'May 23, 4.3PM Delivered'),
-                                              Text1(
-                                                text1: products1[index].price,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: CustomOutlinedButton(
-                                                text: 'Cancel Order',
-                                                onTap: () {}),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Flexible(
-                                            child: CustomButton(
-                                                text: 'Track Order',
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const SelectLocationScreen(),
-                                                    ),
-                                                  );
-                                                }),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
+                        const SizedBox(width: 8),
+                        _StatusFilterChip(
+                          label: 'Đang giao',
+                          isActive: _selectedFilter == 'delivering',
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = 'delivering';
+                            });
                           },
                         ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const CancelledOrders()));
-                      },
-                      child: SlideTransition(
-                        position: _slideFromLeftAnimation,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text1(
-                              text1: 'Cancelled Orders',
-                              size: 14,
-                            ),
-                            Text11(
-                              text2: 'See All',
-                              color: AppColors.text3Color,
-                            )
-                          ],
+                        const SizedBox(width: 8),
+                        _StatusFilterChip(
+                          label: 'Đã giao',
+                          isActive: _selectedFilter == 'completed',
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = 'completed';
+                            });
+                          },
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        _StatusFilterChip(
+                          label: 'Đã huỷ',
+                          isActive: _selectedFilter == 'cancelled',
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = 'cancelled';
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    SlideTransition(
-                      position: _slideFromLeftAnimation,
-                      child: SizedBox(
-                        height: 175,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: products3.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                width: 250,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Image.asset(
-                                          products3[index].imagePath,
-                                          width: 80,
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text1(
-                                                text1: products3[index].name,
-                                              ),
-                                              const Text2(
-                                                  text2:
-                                                      'May 23, 4.3PM Delivered'),
-                                              Text1(
-                                                text1: products3[index].price,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: CustomOutlinedButton(
-                                                text: 'Cancel Order',
-                                                onTap: () {}),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Flexible(
-                                            child: CustomButton(
-                                                text: 'Track Order',
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const SelectLocationScreen(),
-                                                    ),
-                                                  );
-                                                }),
-                                          )
-                                        ],
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_selectedFilter == 'processing' ||
+                                _selectedFilter == 'delivering') ...[
+                              SlideTransition(
+                                position: _slideFromLeftAnimation,
+                                child: _buildSectionHeader(
+                                  context,
+                                  title: _selectedFilter == 'processing'
+                                      ? 'Đang xử lý'
+                                      : 'Đang giao',
+                                  onTapSeeAll: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ActiveOrders(),
                                       ),
-                                    )
-                                  ],
+                                    );
+                                  },
                                 ),
                               ),
-                            );
-                          },
+                              const SizedBox(height: 8),
+                              SlideTransition(
+                                position: _slideFromLeftAnimation,
+                                child: Column(
+                                  children: List.generate(2, (index) {
+                                    final product = products[index];
+                                    return _OrderCard(
+                                      statusLabel:
+                                          _selectedFilter == 'processing'
+                                              ? 'Đang xử lý'
+                                              : 'Đang giao',
+                                      statusColor: AppColors.text3Color,
+                                      dateTimeText:
+                                          _selectedFilter == 'processing'
+                                              ? '23 May, 14:05'
+                                              : '23 May, 16:30',
+                                      product: product,
+                                      totalText: '1.250.000 đ',
+                                      primaryButtonText: 'Theo dõi đơn',
+                                      secondaryButtonText: 'Huỷ đơn',
+                                      onPrimaryTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SelectLocationScreen(),
+                                          ),
+                                        );
+                                      },
+                                      onSecondaryTap: () {},
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ] else if (_selectedFilter == 'completed') ...[
+                              SlideTransition(
+                                position: _slideFromRightAnimation,
+                                child: _buildSectionHeader(
+                                  context,
+                                  title: 'Đã giao',
+                                  onTapSeeAll: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const CompletedOrders(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SlideTransition(
+                                position: _slideFromRightAnimation,
+                                child: Column(
+                                  children: List.generate(2, (index) {
+                                    final product = products1[index];
+                                    return _OrderCard(
+                                      statusLabel: 'Đã giao',
+                                      statusColor: AppColors.text3Color,
+                                      dateTimeText: '23 May, 09:15',
+                                      product: product,
+                                      totalText: '980.000 đ',
+                                      primaryButtonText: 'Mua lại',
+                                      secondaryButtonText: 'Đánh giá',
+                                      onPrimaryTap: () {},
+                                      onSecondaryTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SelectLocationScreen(),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ] else if (_selectedFilter == 'cancelled') ...[
+                              SlideTransition(
+                                position: _slideFromLeftAnimation,
+                                child: _buildSectionHeader(
+                                  context,
+                                  title: 'Đã huỷ',
+                                  onTapSeeAll: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const CancelledOrders(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SlideTransition(
+                                position: _slideFromLeftAnimation,
+                                child: Column(
+                                  children: List.generate(2, (index) {
+                                    final product = products3[index];
+                                    return _OrderCard(
+                                      statusLabel: 'Đã huỷ',
+                                      statusColor: AppColors.text3Color,
+                                      dateTimeText: '23 May, 11:20',
+                                      product: product,
+                                      totalText: '560.000 đ',
+                                      primaryButtonText: 'Mua lại',
+                                      secondaryButtonText: 'Lý do huỷ',
+                                      onPrimaryTap: () {},
+                                      onSecondaryTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SelectLocationScreen(),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                          ],
                         ),
                       ),
                     ),
@@ -439,6 +351,163 @@ class OrdersHistoryState extends State<OrdersHistory>
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+Widget _buildSectionHeader(
+  BuildContext context, {
+  required String title,
+  required VoidCallback onTapSeeAll,
+}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text1(
+        text1: title,
+        size: 15,
+      ),
+      GestureDetector(
+        onTap: onTapSeeAll,
+        child: const Text11(
+          text2: 'Xem tất cả',
+          color: AppColors.text3Color,
+        ),
+      ),
+    ],
+  );
+}
+
+class _OrderCard extends StatelessWidget {
+  const _OrderCard({
+    required this.statusLabel,
+    required this.statusColor,
+    required this.dateTimeText,
+    required this.product,
+    required this.totalText,
+    required this.primaryButtonText,
+    required this.secondaryButtonText,
+    required this.onPrimaryTap,
+    required this.onSecondaryTap,
+  });
+
+  final String statusLabel;
+  final Color statusColor;
+  final String dateTimeText;
+  final Product product;
+  final String totalText;
+  final String primaryButtonText;
+  final String secondaryButtonText;
+  final VoidCallback onPrimaryTap;
+  final VoidCallback onSecondaryTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.strokeColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text2(
+                      text2: dateTimeText,
+                      color: AppColors.text2Color,
+                    ),
+                    const SizedBox(height: 2),
+                    Text2(
+                      text2: 'Mã đơn: CP-2025-001',
+                      color: AppColors.text2Color,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.bgColor,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text2(
+                  text2: statusLabel,
+                  color: statusColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  product.images.first,
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text1(
+                      text1: product.productName,
+                    ),
+                    const SizedBox(height: 4),
+                    const Text2(
+                      text2: '1 sản phẩm',
+                      color: AppColors.text2Color,
+                    ),
+                    const SizedBox(height: 4),
+                    Text1(
+                      text1: 'Tổng: $totalText',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: CustomOutlinedButton(
+                  text: secondaryButtonText,
+                  onTap: onSecondaryTap,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomButton(
+                  text: primaryButtonText,
+                  onTap: onPrimaryTap,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

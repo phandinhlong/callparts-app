@@ -6,7 +6,7 @@ class Product {
   final int manufacturerId;
   final int categoryId;
   final String productName;
-  final String pCode;
+  final String? pCode;
   final String? sku;
   final int stock;
   final double price;
@@ -38,7 +38,7 @@ class Product {
     required this.manufacturerId,
     required this.categoryId,
     required this.productName,
-    required this.pCode,
+    this.pCode,
     this.sku,
     required this.stock,
     required this.price,

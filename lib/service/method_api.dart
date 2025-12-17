@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
-var urlMain = "http://callparts1.vn";
+var urlMain = "http://192.168.1.29:8000";
 var urlAPI = "$urlMain/api/";
+var urlApp = "$urlAPI/call-parts/";
+var urlImg= "https://callparts.vn";
 
 Options getApiHeaders(String? token) {
   final headers = {
@@ -16,9 +18,9 @@ Options getApiHeaders(String? token) {
 }
 
 Options defaultHeaders() => Options(headers: {
-  'Content-Type': 'application/json',
-  'Accept': 'application/json',
-});
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    });
 
 final Dio _dio = Dio();
 
@@ -34,8 +36,6 @@ Future<Response> postRequest({
     data: jsonEncode(requestData),
     options: options ?? Options(headers: {'Accept': 'application/json'}),
   ).timeout(timeout);
-  print(response.data);
-  print(response.statusCode);
   return response;
 }
 
@@ -79,6 +79,5 @@ Future<Response> deleteRequest({
     '$url$endpoint',
     options: options ?? Options(headers: {'Content-Type': 'application/json'}),
   ).timeout(timeout);
-
   return response;
 }
