@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+    <string name="app_name">callparts</string>
+    <string name="facebook_app_id">1185907586316908</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">7458f409cfd4bf81b61766e7d71b4463</string>
+</resources>
