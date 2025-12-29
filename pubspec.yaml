@@ -53,6 +53,8 @@ dependencies:
   firebase_core: ^4.2.1
   flutter_facebook_auth: ^7.1.2
   cached_network_image: ^3.4.1
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
