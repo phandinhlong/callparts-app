@@ -140,7 +140,7 @@ class CancelledOrdersState extends State<CancelledOrders>
                                           CrossAxisAlignment.start,
                                       children: [
                                         Image.asset(
-                                          products[index].imagePath,
+                                          products[index].images.first,
                                           width: 80,
                                         ),
                                         const SizedBox(width: 14),
@@ -150,13 +150,13 @@ class CancelledOrdersState extends State<CancelledOrders>
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text1(
-                                                text1: products[index].name,
+                                                text1: products[index].productName,
                                               ),
                                               const Text2(
                                                   text2:
                                                       'May 23, 4.3PM Delivered'),
                                               Text1(
-                                                text1: products[index].price,
+                                                text1: products[index].price.toString(),
                                               ),
                                             ],
                                           ),

@@ -18,24 +18,24 @@ class PastOrders extends StatefulWidget {
 }
 
 class PastOrdersState extends State<PastOrders> {
-  List<Product> cancelledProducts = [
-    Product(imagePath: 'images/oil.png', name: 'Oil', price: '\$4.30'),
-    Product(
-        imagePath: 'images/lamb_meat.png', name: 'Lamb Meat', price: '\$4.30'),
-    Product(imagePath: 'images/banana.png', name: 'Banana', price: '\$4.30'),
-  ];
-
-  List<Product> activeProducts = [
-    Product(imagePath: 'images/ginger.png', name: 'Ginger', price: '\$4.30'),
-    Product(imagePath: 'images/carrot.png', name: 'Carrot', price: '\$1.25'),
-    Product(imagePath: 'images/beef.png', name: 'Beef', price: '\$5.50'),
-  ];
-
-  List<Product> completedProducts = [
-    Product(imagePath: 'images/apple.png', name: 'Apple', price: '\$2.00'),
-    Product(imagePath: 'images/fruit.png', name: 'Fruits', price: '\$1.75'),
-    Product(imagePath: 'images/chicken.png', name: 'Chicken', price: '\$4.30'),
-  ];
+  // List<Product> cancelledProducts = [
+  //   Product(imagePath: 'images/oil.png', name: 'Oil', price: '\$4.30', brand: "HU", rating: 200.0),
+  //   Product(
+  //       imagePath: 'images/lamb_meat.png', name: 'Lamb Meat', price: '\$4.30', brand: "HU", rating: 200.0),
+  //   Product(imagePath: 'images/banana.png', name: 'Banana', price: '\$4.30', brand: "HU", rating: 200.0),
+  // ];
+  //
+  // List<Product> activeProducts = [
+  //   Product(imagePath: 'images/ginger.png', name: 'Ginger', price: '\$4.30', brand: "HU", rating: 200.0),
+  //   Product(imagePath: 'images/carrot.png', name: 'Carrot', price: '\$1.25', brand: "HU", rating: 200.0),
+  //   Product(imagePath: 'images/beef.png', name: 'Beef', price: '\$5.50', brand: "HU", rating: 200.0),
+  // ];
+  //
+  // List<Product> completedProducts = [
+  //   Product(imagePath: 'images/apple.png', name: 'Apple', price: '\$2.00', brand: "HU", rating: 200.0),
+  //   Product(imagePath: 'images/fruit.png', name: 'Fruits', price: '\$1.75', brand: "HU", rating: 200.0),
+  //   Product(imagePath: 'images/chicken.png', name: 'Chicken', price: '\$4.30', brand: "HU", rating: 200.0),
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +55,8 @@ class PastOrdersState extends State<PastOrders> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-                ...cancelledProducts.map(
-                    (product) => buildOrderItem(context, product, 'Cancelled')),
+                // ...cancelledProducts.map(
+                //     (product) => buildOrderItem(context, product, 'Cancelled')),
                 const SizedBox(height: 8),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 7),
@@ -64,8 +64,8 @@ class PastOrdersState extends State<PastOrders> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-                ...activeProducts.map(
-                    (product) => buildOrderItem(context, product, 'Active')),
+                // ...activeProducts.map(
+                //     (product) => buildOrderItem(context, product, 'Active')),
                 const SizedBox(height: 8),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 7),
@@ -73,8 +73,8 @@ class PastOrdersState extends State<PastOrders> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-                ...completedProducts.map(
-                    (product) => buildOrderItem(context, product, 'Completed')),
+                // ...completedProducts.map(
+                //     (product) => buildOrderItem(context, product, 'Completed')),
               ],
             ),
           ),
@@ -98,7 +98,7 @@ class PastOrdersState extends State<PastOrders> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    product.imagePath,
+                    product.images.first,
                     width: 80,
                   ),
                   const SizedBox(width: 14),
@@ -107,11 +107,11 @@ class PastOrdersState extends State<PastOrders> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text1(
-                          text1: product.name,
+                          text1: product.productName,
                         ),
                         const Text2(text2: 'May 23, 4.3PM Delivered'),
                         Text1(
-                          text1: product.price,
+                          text1: product.price.toString(),
                         ),
                       ],
                     ),

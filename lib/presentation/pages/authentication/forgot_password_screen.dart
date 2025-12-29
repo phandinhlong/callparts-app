@@ -1,4 +1,5 @@
 import 'package:callparts/presentation/pages/authentication/reset_password_screen.dart';
+import 'package:callparts/service/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:callparts/core/constants/app_colors.dart';
@@ -14,19 +15,22 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  AuthService auth = AuthService();
+  TextEditingController _emailTextController = TextEditingController();
+  String _errorMessage = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background color with News Wave text
           Container(
             width: double.infinity,
-            color: AppColors.buttonColor, // Replace with your specific color
+            color: AppColors.buttonColor,
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(height: 100), // Add some spacing from the top
+                SizedBox(height: 100),
                 Text1(
                   text1: 'Auto Parts App',
                   color: Colors.white,
@@ -35,7 +39,6 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ],
             ),
           ),
-          // Main content
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -58,21 +61,42 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           text1: 'Forgot Password',
                           size: 24,
                         ),
+                        if (_errorMessage.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _errorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 14),
+                            ),
+                          ),
                         const SizedBox(height: 20),
-                        const CustomTextField(
+                        CustomTextField(
                           label: 'Email',
                           icon: Icons.email,
+                          controller: _emailTextController,
                         ),
                         const SizedBox(height: 20),
                         CustomButton(
                           text: 'Reset Password',
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
+                          onTap: () async {
+                            setState(() {
+                              _errorMessage = '';
+                            });
+                            bool success = await auth
+                                .forgotPassword(_emailTextController.text);
+                            setState(() {
+                              _errorMessage = auth.message_error; // ← cập nhật lỗi
+                            });
+                            if (success) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
                                   builder: (context) =>
-                                      const ResetPasswordScreen()),
-                            );
+                                  ResetPasswordScreen(email: _emailTextController.text),
+                                ),
+                              );
+                            }
                           },
                         ),
                         const SizedBox(height: 20),
@@ -82,14 +106,12 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             const Text('Remembered your password? '),
                             GestureDetector(
                               onTap: () {
-                                Navigator.pop(
-                                    context); // Go back to login screen
+                                Navigator.pop(context);
                               },
                               child: const Text(
                                 'Login',
                                 style: TextStyle(
                                   color: AppColors.buttonColor,
-                                  // Replace with your specific color
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

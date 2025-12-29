@@ -3,9 +3,10 @@ import 'package:callparts/presentation/pages/authentication/AuthWidgets/auth_tab
 import 'package:callparts/presentation/pages/authentication/forgot_password_screen.dart';
 import 'package:callparts/presentation/pages/authentication/signup_screen.dart';
 import 'package:callparts/presentation/pages/home/home_page.dart';
-import 'package:callparts/presentation/widgets/text1.dart';
 import 'package:callparts/presentation/widgets/custom_button.dart';
 import 'package:callparts/presentation/widgets/custom_text_field.dart';
+import 'package:callparts/presentation/widgets/text1.dart';
+import 'package:callparts/service/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,21 +18,93 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
+  bool _isGoogleLoading = false;
+  bool _isFacebookLoading = false;
+  final AuthService authService = AuthService();
+  final TextEditingController emailTextController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  late String _errorMessage = '';
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isGoogleLoading = true;
+    });
+
+    try {
+      bool success = await authService.loginGoogle();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = authService.message_error;
+            _isGoogleLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isGoogleLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    setState(() {
+      _errorMessage = '';
+      _isFacebookLoading = true;
+    });
+
+    try {
+      bool success = await authService.loginFacebook();
+
+      if (success) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = authService.message_error;
+            _isFacebookLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra lỗi khi đăng nhập';
+          _isFacebookLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background color with News Wave text and image
           Container(
             width: double.infinity,
-            color: AppColors.buttonColor, // Replace with your specific color
+            color: AppColors.buttonColor,
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(height: 100), // Add some spacing from the top
-
+                SizedBox(height: 100),
                 Text1(
                   text1: 'Auto Parts App',
                   color: Colors.white,
@@ -40,12 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-          // Main content
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.7,
+                height: MediaQuery.of(context).size.height * 0.72,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -62,16 +134,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text1(
                           text1: 'Login',
                           size: 24,
-                        ),
+                        ),if (_errorMessage.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _errorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 14),
+                            ),
+                          ),
                         const SizedBox(height: 20),
-                        const CustomTextField(
-                          label: 'Username',
-                          icon: Icons.person,
+                        CustomTextField(
+                          label: 'Email',
+                          icon: Icons.email,
+                          controller: emailTextController,
                         ),
-                        const CustomTextField(
+                        CustomTextField(
                           label: 'Password',
                           icon: Icons.lock,
                           icon2: Icons.visibility,
+                          controller: passwordController,
+                          obscureText: true,
                         ),
                         const SizedBox(height: 5),
                         Row(
@@ -110,28 +193,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 20),
                         CustomButton(
                             text: 'Login',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomePage()),
+                            onTap: () async {
+                              setState(() {
+                                _errorMessage = '';
+                              });
+                              bool success = await authService.login(
+                                emailTextController.text,
+                                passwordController.text,
                               );
+                              if (success) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const HomePage()),
+                                );
+                              }else{
+                                setState(() {
+                                  _errorMessage = authService.message_error;
+                                });
+                              }
                             }),
                         const SizedBox(height: 20),
                         const Text('or continue with'),
                         const SizedBox(height: 20),
-                        const Row(
+                        Row(
                           children: [
                             AuthTab(
                               image: 'images/icons8-facebook-48.png',
                               text: 'Facebook',
+                              onTap: _isFacebookLoading ? null : _handleFacebookSignIn,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 12,
                             ),
                             AuthTab(
                               image: 'images/icons8-google-48.png',
                               text: 'Google',
+                              onTap: _isGoogleLoading ? null : _handleGoogleSignIn,
                             ),
                           ],
                         ),
@@ -142,19 +240,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Text("Don't have an account? "),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignUpScreen()),
+                                Navigator.of(context).push(
+                                  PageRouteBuilder(
+                                    transitionDuration: const Duration(milliseconds: 300),
+                                    pageBuilder: (context, animation, secondaryAnimation) => const SignUpScreen(),
+                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                      const beginOffset = Offset(1.0, 0.0);
+                                      const endOffset = Offset.zero;
+                                      var tween = Tween(begin: beginOffset, end: endOffset).chain(CurveTween(curve: Curves.easeInOut));
+                                      var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+                                      return SlideTransition(
+                                        position: animation.drive(tween),
+                                        child: FadeTransition(
+                                          opacity: animation.drive(fadeTween),
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 );
-                                // Navigate to signup screen
                               },
                               child: const Text(
                                 'Sign Up',
                                 style: TextStyle(
                                   color: Color(0xFF1A73E8),
-                                  // Replace with your specific color
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -169,6 +278,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+          if (_isGoogleLoading || _isFacebookLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -1,59 +1,78 @@
+import 'package:callparts/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-import '../text1.dart';
-
-class CategoriesColumn extends StatelessWidget {
-  final IconData icon;
+class CategoryItem extends StatelessWidget {
+  final String imagePath;
   final String text;
-  final Color iconColor; // Added dynamic color for the icon
+  final VoidCallback? onTap;
 
-  const CategoriesColumn({
+  const CategoryItem({
     super.key,
-    required this.icon,
+    required this.imagePath,
     required this.text,
-    this.iconColor =
-        const Color(0xFF444B5D), // Default modern icon color (Slate Grey)
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            height: 55,
-            width: 55,
-            decoration: BoxDecoration(
-              color: Colors.white, // White background for the container
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3), // Subtle shadow for elevation
-                ),
-              ],
+    final isNetworkImage = imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('/');
+
+    final imageUrl = imagePath;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 130,
+              width: 130,
+              child: isNetworkImage
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.category,
+                        color: AppColors.buttonHome.withOpacity(0.5),
+                        size: 28,
+                      ),
+                    )
+                  : Image.asset(
+                      imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.category,
+                        color: AppColors.buttonHome.withOpacity(0.5),
+                        size: 28,
+                      ),
+                    ),
             ),
-            child: Center(
-              child: Icon(
-                icon,
-                size: 30,
-                color: iconColor, // Use the provided or default modern color
+            Flexible(
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey.shade900,
+                  height: 1.1,
+                  letterSpacing: -0.1,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          Text1(
-            text1: text,
-            size: 13,
-            color: Colors.grey.shade700, // Slightly dark text for a modern look
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

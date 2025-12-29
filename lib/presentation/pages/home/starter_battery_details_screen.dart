@@ -12,146 +12,260 @@ class StarterBatteryDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.white,
+      body: Stack(
         children: [
-          // Starter Battery Image
-          Stack(
+          Column(
             children: [
-              Image.asset(
-                'images/starterbattery.png', // Starter Battery image path
-                width: double.infinity,
-                height: 250,
-                fit: BoxFit.cover,
+              // Image with back button
+              Stack(
+                children: [
+                  Image.asset(
+                    'images/starterbattery.png',
+                    width: double.infinity,
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    top: 50,
+                    left: 16,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ],
               ),
-              Positioned(
-                top: 40,
-                left: 16,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back,
-                      color: Colors.white, size: 28),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name and Favorite
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Premium Starter Battery',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.favorite_border, color: Colors.red, size: 30),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Rating and Stock
+                      Row(
+                        children: [
+                          Row(
+                            children: List.generate(5, (index) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 18,
+                            )),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '(4.8)',
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'Còn hàng',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Price
+                      const Text(
+                        '120.000 đ',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Brand
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'BOSCH',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Description
+                      const Text(
+                        'Mô tả sản phẩm',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ắc quy khởi động cao cấp đảm bảo hiệu suất đáng tin cậy cho xe của bạn, cung cấp nguồn điện ổn định để khởi động động cơ ngay cả trong điều kiện thời tiết khắc nghiệt. Hoàn hảo cho ô tô, xe tải và SUV.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Key Features
+                      const Text(
+                        'Tính năng chính',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Column(
+                        children: [
+                          _buildFeatureItem('• Dung lượng cao (CCA) để khởi động đáng tin cậy'),
+                          _buildFeatureItem('• Thiết kế không cần bảo dưỡng'),
+                          _buildFeatureItem('• Tuổi thọ lâu với cấu trúc bền vững'),
+                          _buildFeatureItem('• Kháng nước và bụi chuẩn IP65'),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      // Compatibility
+                      const Text(
+                        'Tương thích',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• Phù hợp với hầu hết các dòng xe Toyota, Honda, Hyundai',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Usage Guidelines
+                      const Text(
+                        'Hướng dẫn sử dụng',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Column(
+                        children: [
+                          _buildFeatureItem('• Đảm bảo lắp đặt bởi chuyên gia'),
+                          _buildFeatureItem('• Bảo quản ở nơi khô ráo, mát'),
+                          _buildFeatureItem('• Kiểm tra định kỳ các đầu cực'),
+                          _buildFeatureItem('• Thay thế sau 3-5 năm sử dụng'),
+                        ],
+                      ),
+                      const SizedBox(height: 100), // Space for sticky CTA
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Starter Battery Name and Favorite Icon
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text1(
-                          text1: 'Premium Starter Battery',
-                          size: 20,
+          // Sticky CTA
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const CartScreen(),
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        Icon(Icons.favorite_border,
-                            color: Colors.red, size: 30),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-
-                    // Location
-                    Row(
-                      children: [
-                        Icon(Icons.location_on,
-                            size: 20, color: AppColors.tabColor),
-                        SizedBox(width: 8),
-                        Text2(
-                          text2: 'Auto Parts Warehouse, Texas',
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Thêm vào giỏ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-
-                    // Price
-                    Text(
-                      '\$120.00',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.buttonColor,
                       ),
                     ),
-                    SizedBox(height: 10),
-
-                    // Starter Battery Description
-                    Text1(
-                      text1: 'About Starter Battery',
-                      size: 18,
-                    ),
-                    SizedBox(height: 10),
-                    Text2(
-                      text2:
-                          'This premium starter battery ensures reliable performance for your vehicle, providing consistent power to start your engine even in extreme weather conditions. Perfect for cars, trucks, and SUVs.',
-                    ),
-                    SizedBox(height: 20),
-
-                    // Key Features
-                    Text1(
-                      text1: 'Key Features',
-                      size: 18,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '• High Cold Cranking Amps (CCA) for reliable starts\n'
-                      '• Maintenance-free design\n'
-                      '• Long lifespan with durable construction',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Usage Guidelines
-                    Text1(
-                      text1: 'Usage Guidelines',
-                      size: 18,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '• Compatible with most vehicles\n'
-                      '• Ensure proper installation by a professional\n'
-                      '• Store in a dry, cool place when not in use',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Additional Tips
-                    Text1(
-                      text1: 'Additional Tips',
-                      size: 18,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '• Regularly check the battery terminals for corrosion\n'
-                      '• Keep the battery fully charged for optimal performance\n'
-                      '• Replace the battery every 3-5 years for best results',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    SizedBox(height: 30),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: CustomButton(
-              text: 'Add to Cart',
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CartScreen(),
-                ));
-              },
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.grey,
+          height: 1.4,
+        ),
       ),
     );
   }

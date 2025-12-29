@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:callparts/presentation/pages/authentication/login_screen.dart';
+import 'package:callparts/presentation/pages/home/home_page.dart';
+import 'package:callparts/service/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,13 +25,11 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Initialize the animation controller
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
 
-    // Define the slide animations
     _imageAnimation = Tween<Offset>(
       begin: const Offset(0, -1),
       end: Offset.zero,
@@ -49,23 +49,36 @@ class _SplashScreenState extends State<SplashScreen>
       begin: const Offset(0, 1),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
-    // Define the opacity animation
     _opacityAnimation = Tween<double>(
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
-    // Start the animation
     _controller.forward();
+    
+    _checkLoginStatus();
+  }
 
-    // Set up a timer to navigate to the next screen after the animation completes
-    Timer(const Duration(seconds: 4), () {
+  Future<void> _checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 4));
+    
+    if (!mounted) return;
+    
+    final authService = AuthService();
+    final isLoggedIn = await authService.loadCredentials();
+    
+    if (!mounted) return;
+    
+    if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
   }
 
   @override
@@ -95,7 +108,6 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Space between image and text
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -122,7 +134,6 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // Space between text and Grocery App
                     SlideTransition(
                       position: _groceryAppAnimation,
                       child: const Text(
