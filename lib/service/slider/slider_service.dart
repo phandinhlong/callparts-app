@@ -5,7 +5,7 @@ import '../method_api.dart';
 class SliderService {
   Future<List<Slider>?> getAll() async {
     final response = await getRequest(
-      url: urlAPI,
+      url: urlApp,
       endpoint: 'slider/',
       timeout: const Duration(seconds: 10),
     );

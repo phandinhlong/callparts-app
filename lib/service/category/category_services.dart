@@ -16,10 +16,11 @@ class CategoryService {
     }
 
     final response = await getRequest(
-      url: urlAPI,
-      endpoint: 'category/',
+      url: urlApp,
+      endpoint: 'category',
       timeout: const Duration(seconds: 10),
     );
+    print(response.data);
     if (response.statusCode == 200) {
       final data = response.data;
       if (data['status'] == true && data['categories'] != null) {
@@ -104,20 +105,19 @@ class CategoryService {
   Future<List<Product>> getProductsByCategorySlug(String slug) async {
     try {
       final response = await getRequest(
-        url: urlAPI,
+        url: urlApp,
         endpoint: 'category/$slug',
         timeout: const Duration(seconds: 10),
       );
       if (response.statusCode == 200) {
         final data = response.data;
-        final product=data['data']['products'];
+        final product = data['data']['products'];
         if (data['success'] == true) {
           if (product != null) {
             if (product is Map && product['items'] != null) {
               final List<dynamic> productList = product['items'];
               return productList.map((json) => Product.fromJson(json)).toList();
-            }
-            else if (data['products'] is List) {
+            } else if (data['products'] is List) {
               final List<dynamic> productList = data['products'];
               return productList.map((json) => Product.fromJson(json)).toList();
             }

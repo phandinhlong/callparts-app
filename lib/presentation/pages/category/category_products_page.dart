@@ -6,6 +6,7 @@ import 'package:callparts/data/models/category.dart';
 import 'package:callparts/service/category/category_services.dart';
 import 'package:callparts/presentation/widgets/common/product_card.dart';
 import 'package:callparts/presentation/widgets/common/collapsible_search_widget.dart';
+import 'package:callparts/presentation/widgets/common/cart_icon_with_badge.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 enum SortOption {
@@ -268,6 +269,12 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          CartIconWithBadge(
+            iconColor: AppColors.buttonTextColor,
+            badgeColor: AppColors.text3Color,
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

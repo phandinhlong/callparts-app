@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:callparts/presentation/pages/authentication/login_screen.dart';
 import 'package:callparts/presentation/pages/home/home_page.dart';
+import 'package:callparts/service/auth/auth_services.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -53,12 +54,31 @@ class _SplashScreenState extends State<SplashScreen>
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _controller.forward();
-    Timer(const Duration(seconds: 4), () {
+    
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 4));
+    
+    if (!mounted) return;
+    
+    final authService = AuthService();
+    final isLoggedIn = await authService.loadCredentials();
+    
+    if (!mounted) return;
+    
+    if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
   }
 
   @override

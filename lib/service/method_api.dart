@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
-var urlMain = "http://192.168.1.29:8000";
+// var urlMain = "http://192.168.1.29:8000";
+var urlMain = "https://callparts.vn";
 var urlAPI = "$urlMain/api/";
-var urlApp = "$urlAPI/call-parts/";
+var urlApp = "${urlAPI}call-parts/";
 var urlImg= "https://callparts.vn";
 
 Options getApiHeaders(String? token) {

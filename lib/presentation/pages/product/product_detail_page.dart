@@ -5,11 +5,17 @@ import 'package:callparts/service/method_api.dart';
 import 'package:callparts/service/open_shopee.dart';
 import 'package:callparts/service/product/product_service.dart';
 import 'package:callparts/presentation/widgets/common/product_card.dart';
+import 'package:callparts/presentation/pages/cartScreen/cart_screen.dart';
+import 'package:callparts/presentation/widgets/common/cart_icon_with_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:callparts/model/product.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:callparts/presentation/providers/cart_provider.dart';
+import 'package:callparts/presentation/providers/favorite_provider.dart';
+import 'package:callparts/presentation/widgets/animations/fly_to_cart_animation.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -33,6 +39,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   // Related products state
   List<Product> _relatedProducts = [];
   bool _isLoadingRelated = true;
+  
+  // Cart animation keys
+  final GlobalKey _productImageKey = GlobalKey();
+  final GlobalKey _cartIconKey = GlobalKey();
+  bool _isAdding = false;
 
   @override
   void initState() {
@@ -183,17 +194,41 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           ),
         ),
         actions: [
+          // Cart Icon with Badge
+          CartIconWithBadge(
+            cartIconKey: _cartIconKey,
+            iconColor: AppColors.buttonTextColor,
+            badgeColor: AppColors.text3Color,
+          ),
           IconButton(
             icon: const Icon(Icons.share, color: AppColors.buttonTextColor),
             onPressed: () {
               // TODO: Implement share functionality
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.favorite_border,
-                color: AppColors.buttonTextColor),
-            onPressed: () {
-              // TODO: Implement favorite functionality
+          Consumer<FavoriteProvider>(
+            builder: (context, favoriteProvider, child) {
+              final isFavorite = favoriteProvider.isFavorite(widget.product.id);
+              return IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : AppColors.buttonTextColor,
+                ),
+                onPressed: () {
+                  favoriteProvider.toggleFavorite(widget.product);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isFavorite 
+                            ? 'Đã xóa khỏi yêu thích' 
+                            : 'Đã thêm vào yêu thích',
+                      ),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: isFavorite ? Colors.grey : Colors.green,
+                    ),
+                  );
+                },
+              );
             },
           ),
         ],
@@ -333,7 +368,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                             onTap: () {
                               OpenShopee().openShopeeUrl(
                                   widget.product.shoppeLink.toString());
-                              print(1);
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -467,19 +501,22 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           SizedBox(
             height: 300,
             width: double.infinity,
-            child: CachedNetworkImage(
-              imageUrl: urlImg+images[_selectedImageIndex],
-              fit: BoxFit.contain,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
+            child: Container(
+              key: _productImageKey,
+              child: CachedNetworkImage(
+                imageUrl: urlImg+images[_selectedImageIndex],
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
                 ),
-              ),
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(
-                  Icons.image_not_supported,
-                  size: 80,
-                  color: Colors.grey,
+                errorWidget: (context, url, error) => const Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
@@ -758,34 +795,78 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content:
-                      Text('${widget.product.productName} đã thêm vào giỏ'),
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
+            onPressed: _isAdding ? null : _addToCart,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF007BFF),
+              backgroundColor: AppColors.buttonColor,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
+              disabledBackgroundColor: Colors.grey[400],
             ),
-            child: const Text(
-              'THÊM VÀO GIỎ HÀNG',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: _isAdding
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text(
+                    'THÊM VÀO GIỎ HÀNG',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
       ),
+    );
+  }
+
+  void _addToCart() async {
+    if (_isAdding) return;
+
+    setState(() {
+      _isAdding = true;
+    });
+
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    
+    // Add to cart
+    cartProvider.addItem(widget.product);
+
+    // Trigger animation
+    final imageUrl = widget.product.images.isNotEmpty 
+        ? urlImg + widget.product.images.first 
+        : '';
+    
+    FlyToCartHelper.startAnimation(
+      context: context,
+      imageUrl: imageUrl,
+      sourceKey: _productImageKey,
+      targetKey: _cartIconKey,
+      isNetworkImage: true,
+      onComplete: () {
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${widget.product.productName} đã thêm vào giỏ'),
+              duration: const Duration(seconds: 1),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          setState(() {
+            _isAdding = false;
+          });
+        }
+      },
     );
   }
 }

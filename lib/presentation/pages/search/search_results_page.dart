@@ -3,6 +3,7 @@ import 'package:callparts/model/product.dart';
 import 'package:callparts/core/constants/app_colors.dart';
 import 'package:callparts/presentation/widgets/common/product_card.dart';
 import 'package:callparts/presentation/widgets/common/collapsible_search_widget.dart';
+import 'package:callparts/presentation/widgets/common/cart_icon_with_badge.dart';
 
 enum SortOption {
   nameAZ('Tên A đến Z'),
@@ -232,6 +233,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           ],
         ),
         centerTitle: false,
+        actions: [
+          CartIconWithBadge(
+            iconColor: AppColors.buttonTextColor,
+            badgeColor: AppColors.text3Color,
+          ),
+        ],
       ),
       body: Column(
         children: [

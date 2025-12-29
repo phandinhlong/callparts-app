@@ -6,7 +6,7 @@ class MakerService {
   Future<List<Maker>> getAll() async {
     try {
       final response = await getRequest(
-        url: urlAPI,
+        url: urlApp,
         endpoint: 'makers/get-maker',
         timeout: const Duration(seconds: 10),
       );
@@ -30,7 +30,7 @@ class MakerService {
   Future<List<Maker>> getCarClass() async {
     try {
       final response = await getRequest(
-        url: urlAPI,
+        url: urlApp,
         endpoint: 'makers/get-car',
         timeout: const Duration(seconds: 10),
       );

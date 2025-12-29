@@ -21,7 +21,6 @@ class CategoryItem extends StatelessWidget {
         imagePath.startsWith('/');
 
     final imageUrl = imagePath;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(

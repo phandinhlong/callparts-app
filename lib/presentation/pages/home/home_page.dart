@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:callparts/service/slider/slider_service.dart';
@@ -8,11 +9,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:callparts/model/product.dart';
 import 'package:callparts/presentation/widgets/common/categories_widget.dart';
 import 'package:callparts/presentation/widgets/common/compact_search_widget.dart';
+import 'package:callparts/presentation/widgets/common/cart_icon_with_badge.dart';
 import 'package:callparts/presentation/pages/settings/Views/grocery_notifications.dart';
 import 'package:callparts/presentation/pages/cartScreen/cart_screen.dart';
 import 'package:callparts/presentation/pages/search/banner_search_screen.dart';
 import 'package:callparts/presentation/pages/profile/profile_screen.dart';
 
+import '../../../service/open_shopee.dart';
+import '../favorite/favorite_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,7 +65,8 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadBanners() async {
     try {
       final images = await SliderService().getImg();
-      final validImages = images.where((img) => img != null).cast<String>().toList();
+      final validImages =
+          images.where((img) => img != null).cast<String>().toList();
 
       if (mounted) {
         setState(() {
@@ -86,7 +91,6 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-
   void _resetFilter() {
     _codeController.clear();
     _searchController.clear();
@@ -106,7 +110,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SearchScreen()),
+          MaterialPageRoute(builder: (context) => const FavoriteScreen()),
         );
         break;
       case 2:
@@ -137,30 +141,24 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: AppColors.buttonColor,
               title: const Text(
                 'Callpart',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               centerTitle: true,
               actions: [
-                IconButton(
-                  icon: const Icon(
-                      Icons.shopping_cart_outlined, color: Colors.white),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CartScreen()),
-                    );
-                  },
+                const Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: CartIconWithBadge(
+                    iconColor: Colors.white,
+                    badgeColor: AppColors.text3Color,
+                    iconSize: 28,
+                  ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications, color: Colors.white),
+                  icon: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 28),
+                  tooltip: 'Liên hệ Zalo',
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const GroceryNotifications()),
-                    );
+                    OpenShopee().openZaloChat();
                   },
                 ),
               ],
@@ -172,8 +170,8 @@ class _HomePageState extends State<HomePage> {
                   _resetFilter();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 13, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -195,12 +193,14 @@ class _HomePageState extends State<HomePage> {
                                     ? Container(
                                         decoration: BoxDecoration(
                                           color: Colors.grey[200],
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                         ),
                                         child: const Center(
                                           child: Text(
                                             'Không có banner',
-                                            style: TextStyle(color: Colors.grey),
+                                            style:
+                                                TextStyle(color: Colors.grey),
                                           ),
                                         ),
                                       )
@@ -222,8 +222,8 @@ class _HomePageState extends State<HomePage> {
                               children: List.generate(_banners.length, (index) {
                                 return AnimatedContainer(
                                   duration: const Duration(milliseconds: 300),
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 3),
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 3),
                                   width: _currentPage == index ? 10 : 6,
                                   height: _currentPage == index ? 10 : 6,
                                   decoration: BoxDecoration(
@@ -243,8 +243,10 @@ class _HomePageState extends State<HomePage> {
                         selectedBrand: _selectedBrand,
                         selectedType: _selectedType,
                         vehicleTypes: vehicleTypes,
-                        onBrandChanged: (value) => setState(() => _selectedBrand = value),
-                        onTypeChanged: (value) => setState(() => _selectedType = value),
+                        onBrandChanged: (value) =>
+                            setState(() => _selectedBrand = value),
+                        onTypeChanged: (value) =>
+                            setState(() => _selectedType = value),
                       ),
                       const SizedBox(height: 20),
                       const Row(
@@ -287,9 +289,9 @@ class _HomePageState extends State<HomePage> {
               label: 'Trang chủ',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search_outlined, size: 24),
-              activeIcon: Icon(Icons.search, size: 24),
-              label: 'Tìm kiếm',
+              icon: Icon(Icons.favorite_border, size: 24),
+              activeIcon: Icon(Icons.favorite, size: 24),
+              label: 'Yêu thích',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart_outlined, size: 24),
@@ -319,7 +321,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBanner(String path) {
     final imageUrl = urlImg + path;
-
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: () {
@@ -364,6 +365,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: CachedNetworkImage(

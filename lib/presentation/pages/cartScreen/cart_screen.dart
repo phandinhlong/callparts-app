@@ -2,66 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:callparts/core/constants/app_colors.dart';
 import 'package:callparts/model/cart_item.dart';
-import 'package:callparts/presentation/widgets/custom_button.dart';
-import 'package:callparts/presentation/widgets/common/product_data.dart';
+import 'package:callparts/presentation/providers/cart_provider.dart';
 import 'package:callparts/presentation/pages/checkout/shipping_address_screen.dart';
+import 'package:callparts/presentation/pages/product/product_detail_page.dart';
+import 'package:provider/provider.dart';
+import 'package:callparts/service/method_api.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
   @override
-  CartScreenState createState() => CartScreenState();
-}
-
-class CartScreenState extends State<CartScreen> {
-  late List<CartItem> cartItems;
-  double shippingFee = 25000; // VND
-  double taxRate = 0.08; // 8%
-
-  @override
-  void initState() {
-    super.initState();
-    cartItems = ProductData()
-        .products
-        .take(3)
-        .map((product) => CartItem.fromProductData(product))
-        .toList();
-  }
-
-  double get subtotal => cartItems
-      .where((item) => item.selected == true)
-      .fold(0.0, (sum, item) => sum + item.totalPrice);
-
-  double get tax => subtotal * taxRate;
-
-  double get total => subtotal + shippingFee + tax;
-
-  void updateQuantity(int index, int change) {
-    setState(() {
-      final current = cartItems[index];
-      final newQuantity = (current.quantity + change).clamp(1, 99);
-      cartItems[index] = current.copyWith(quantity: newQuantity);
-    });
-  }
-
-  void toggleSelected(int index, bool selected) {
-    setState(() {
-      final current = cartItems[index];
-      cartItems[index] = current.copyWith(selected: selected);
-    });
-  }
-
-  void removeItem(int index) {
-    setState(() {
-      cartItems.removeAt(index);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final selectedCount = cartItems.where((e) => e.selected == true).length;
-    final hasSelection = selectedCount > 0 && subtotal > 0;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.buttonColor,
@@ -87,54 +39,62 @@ class CartScreenState extends State<CartScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: cartItems.isEmpty
-                  ? _buildEmptyCart()
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemBuilder: (context, index) {
-                        return _CartItemCard(
-                          item: cartItems[index],
-                          onRemove: () => removeItem(index),
-                          onQuantityChanged: (value) => updateQuantity(
-                            index,
-                            value - cartItems[index].quantity,
-                          ),
-                          onSelectedChanged: (selected) =>
-                              toggleSelected(index, selected),
-                        );
-                      },
-                      separatorBuilder: (_, __) => const SizedBox(height: 16),
-                      itemCount: cartItems.length,
-                    ),
-            ),
+      body: Consumer<CartProvider>(
+        builder: (context, cart, child) {
+          final cartItems = cart.items;
+          final selectedCount = cart.selectedItemsCount;
+          
+          return SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: cartItems.isEmpty
+                      ? _buildEmptyCart(context)
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemBuilder: (context, index) {
+                            return _CartItemCard(
+                              item: cartItems[index],
+                              onRemove: () => cart.removeItem(cartItems[index].productId),
+                              onQuantityChanged: (value) => cart.updateQuantity(
+                                cartItems[index].productId,
+                                value,
+                              ),
+                              onSelectedChanged: (selected) =>
+                                  cart.toggleSelection(cartItems[index].productId, selected),
+                            );
+                          },
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemCount: cartItems.length,
+                        ),
+                ),
 
-            if (cartItems.isNotEmpty)
-              _CartBottomBar(
-                subtotal: subtotal,
-                shippingFee: shippingFee,
-                tax: tax,
-                total: total,
-                itemCount: selectedCount,
-                onCheckout: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ShippingAddressScreen(),
-                    ),
-                  );
-                },
-              ),
-          ],
-        ),
+                if (cartItems.isNotEmpty)
+                  _CartBottomBar(
+                    subtotal: cart.subtotal,
+                    shippingFee: cart.shippingFee,
+                    tax: cart.tax,
+                    total: cart.total,
+                    discount: cart.discount,
+                    itemCount: selectedCount,
+                    onCheckout: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ShippingAddressScreen(),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildEmptyCart() {
+  Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,55 +177,6 @@ class CartScreenState extends State<CartScreen> {
       ),
     );
   }
-
-  Widget _buildCartItem(int index) {
-    final item = cartItems[index];
-    return _CartItemCard(
-      item: item,
-      onRemove: () => removeItem(index),
-      onQuantityChanged: (value) => updateQuantity(
-        index,
-        value - item.quantity,
-      ),
-      onSelectedChanged: (selected) => toggleSelected(index, selected),
-    );
-  }
-
-  Widget _buildPriceRow(String label, double amount, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: isTotal ? 16 : 14,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-              color: isTotal ? AppColors.text3Color : AppColors.text2Color,
-            ),
-          ),
-          Text(
-            _formatCurrency(amount),
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 14,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
-              color: isTotal ? AppColors.text1Color : AppColors.text1Color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatCurrency(double amount) {
-    final formatted = amount.toInt().toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
-    return '$formatted đ';
-  }
-
 }
 
 class _CartColors {
@@ -294,165 +205,200 @@ class _CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _CartColors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _CartColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Checkbox(
-              value: item.selected,
-              activeColor: AppColors.buttonColor,
-              onChanged: (v) => onSelectedChanged(v ?? false),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return InkWell(
+      onTap: () {
+        // Navigate to product detail page
+        if (item.product != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(product: item.product!),
             ),
-
-            // ẢNH SẢN PHẨM
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                item.imagePath,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _CartColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _CartColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: item.selected,
+                activeColor: AppColors.buttonColor,
+                onChanged: (v) => onSelectedChanged(v ?? false),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            ),
 
-            const SizedBox(width: 12),
-
-            // NỘI DUNG
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  // TÊN + NÚT XOÁ
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: _CartColors.textPrimary,
-                            height: 1.3,
+              // ẢNH SẢN PHẨM
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: item.imagePath.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: urlImg + item.imagePath,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      IconButton(
-                        onPressed: onRemove,
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          size: 18,
-                          color: _CartColors.textSecondary,
+                        errorWidget: (context, url, error) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
                         ),
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 32, minHeight: 32),
+                      )
+                    : Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
                       ),
-                    ],
-                  ),
+              ),
 
-                  const SizedBox(height: 4),
+              const SizedBox(width: 12),
 
-                  // BRAND
-                  Text(
-                    item.brand.isNotEmpty ? item.brand : 'Garage AutoCare',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: _CartColors.textSecondary,
-                    ),
-                  ),
+              // NỘI DUNG
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                  const SizedBox(height: 4),
-
-                  // PART INFO
-                  if (item.partNumber != null ||
-                      item.oemCode != null ||
-                      item.compatibility != null)
-                    Column(
+                    // TÊN + NÚT XOÁ
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (item.partNumber != null)
-                          Text(
-                            'Mã SP: ${item.partNumber}',
+                        Expanded(
+                          child: Text(
+                            item.name,
                             style: const TextStyle(
-                              fontSize: 11,
-                              color: _CartColors.textSecondary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: _CartColors.textPrimary,
+                              height: 1.3,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        if (item.oemCode != null)
-                          Text(
-                            'OEM: ${item.oemCode}',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: _CartColors.textSecondary,
-                            ),
+                        ),
+                        IconButton(
+                          onPressed: onRemove,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: _CartColors.textSecondary,
                           ),
-                        if (item.compatibility != null)
-                          Text(
-                            'Dòng xe: ${item.compatibility}',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: _CartColors.textSecondary,
-                            ),
-                          ),
+                          padding: EdgeInsets.zero,
+                          constraints:
+                              const BoxConstraints(minWidth: 32, minHeight: 32),
+                        ),
                       ],
                     ),
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 4),
 
-                  // GIÁ + QUANTITY
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    // BRAND
+                    Text(
+                      item.brand.isNotEmpty ? item.brand : 'Garage AutoCare',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: _CartColors.textSecondary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // PART INFO
+                    if (item.partNumber != null ||
+                        item.oemCode != null ||
+                        item.compatibility != null)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Thành tiền',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: _CartColors.textSecondary,
+                          if (item.partNumber != null)
+                            Text(
+                              'Mã SP: ${item.partNumber}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: _CartColors.textSecondary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatStaticCurrency(item.totalPrice),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.text3Color,
+                          if (item.oemCode != null)
+                            Text(
+                              'OEM: ${item.oemCode}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: _CartColors.textSecondary,
+                              ),
                             ),
-                          ),
+                          if (item.compatibility != null)
+                            Text(
+                              'Dòng xe: ${item.compatibility}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: _CartColors.textSecondary,
+                              ),
+                            ),
                         ],
                       ),
 
-                      _QuantityControl(
-                        quantity: item.quantity,
-                        onChanged: onQuantityChanged,
-                      ),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 10),
+
+                    // GIÁ + QUANTITY
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Thành tiền',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: _CartColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _formatStaticCurrency(item.totalPrice),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.text3Color,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        _QuantityControl(
+                          quantity: item.quantity,
+                          onChanged: onQuantityChanged,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]
+            ]
+        ),
       ),
     );
   }
@@ -541,6 +487,7 @@ class _CartBottomBar extends StatelessWidget {
     required this.shippingFee,
     required this.tax,
     required this.total,
+    required this.discount,
     required this.itemCount,
     required this.onCheckout,
   });
@@ -549,6 +496,7 @@ class _CartBottomBar extends StatelessWidget {
   final double shippingFee;
   final double tax;
   final double total;
+  final double discount;
   final int itemCount;
   final VoidCallback onCheckout;
 
@@ -579,16 +527,30 @@ class _CartBottomBar extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.tabColor,
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFFFF8E1),
+                    const Color(0xFFFFECB3),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.strokeColor),
+                border: Border.all(color: const Color(0xFFFFD54F).withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFD54F).withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   const Icon(
                     FontAwesomeIcons.ticket,
                     size: 14,
-                    color: AppColors.buttonColor,
+                    color: Color(0xFFF57C00),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -600,7 +562,7 @@ class _CartBottomBar extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
-                            color: AppColors.buttonTextColor,
+                            color: Color(0xFFE65100),
                           ),
                         ),
                         SizedBox(height: 2),
@@ -608,7 +570,7 @@ class _CartBottomBar extends StatelessWidget {
                           'Nhập mã ưu đãi dành riêng cho garage / shop',
                           style: TextStyle(
                             fontSize: 11.5,
-                            color: _CartColors.textSecondary,
+                            color: Color(0xFF6D4C41),
                           ),
                         ),
                       ],
@@ -618,16 +580,27 @@ class _CartBottomBar extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFFFF9800),
+                          const Color(0xFFFB8C00),
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.strokeColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF9800).withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Text(
                       'Nhập mã',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.buttonColor,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -726,18 +699,20 @@ class _CartBottomBar extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.text3Color,
+                  backgroundColor: const Color(0xFF4CAF50),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  elevation: 6,
-                  shadowColor: AppColors.text3Color.withOpacity(0.5),
+                  elevation: 4,
+                  shadowColor: const Color(0xFF4CAF50).withOpacity(0.4),
                 ),
                 onPressed: onCheckout,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
+                    Icon(Icons.shopping_bag_outlined, size: 20),
+                    SizedBox(width: 8),
                     Text(
                       'Thanh toán ngay',
                       style: TextStyle(
@@ -770,7 +745,8 @@ class _CartBottomBar extends StatelessWidget {
           value,
           style: const TextStyle(
             fontSize: 13,
-            color: AppColors.buttonTextColor,
+            fontWeight: FontWeight.w600,
+            color: AppColors.text1Color,
           ),
         ),
       ],

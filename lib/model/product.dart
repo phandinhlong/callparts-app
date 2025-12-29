@@ -67,6 +67,18 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Handle images - can be either List (from SharedPreferences) or String (from API)
+    List<String> imagesList = [];
+    if (json['images'] != null) {
+      if (json['images'] is String) {
+        // From API - encoded as JSON string
+        imagesList = List<String>.from(jsonDecode(json['images']));
+      } else if (json['images'] is List) {
+        // From SharedPreferences - already a List
+        imagesList = List<String>.from(json['images']);
+      }
+    }
+    
     return Product(
       id: json['id'],
       manufacturerId: json['manufacturer_id'],
@@ -84,7 +96,7 @@ class Product {
       specificationsEn: json['specifications_en'],
       uses: json['uses'],
       usesEn: json['uses_en'],
-      images: json['images'] != null ? List<String>.from(jsonDecode(json['images'])) : [],
+      images: imagesList,
       weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null,
       length: json['length'] != null ? (json['length'] as num).toDouble() : null,
       width: json['width'] != null ? (json['width'] as num).toDouble() : null,
@@ -119,7 +131,7 @@ class Product {
       'specifications_en': specificationsEn,
       'uses': uses,
       'uses_en': usesEn,
-      'images': images,
+      'images': images, // Keep as List, will be handled by json.encode in FavoriteProvider
       'weight': weight,
       'length': length,
       'width': width,

@@ -29,7 +29,7 @@ class ProductService {
       }
 
       final response = await getRequest(
-        url: urlAPI,
+        url: urlApp,
         endpoint: endpoint,
         timeout: const Duration(seconds: 10),
       );
@@ -52,10 +52,10 @@ class ProductService {
     required String slug,
   }) async {
     try {
-      final endpoint = 'products/detail/$productId-$slug';
+      final endpoint = 'products/relate/$slug';
 
       final response = await getRequest(
-        url: urlAPI,
+        url: urlApp,
         endpoint: endpoint,
         timeout: const Duration(seconds: 10),
       );

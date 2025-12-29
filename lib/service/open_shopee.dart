@@ -6,4 +6,22 @@ class OpenShopee{
       throw Exception('Không thể mở $url');
     }
   }
+  Future<void> openZaloChat() async {
+    const String phone = "0123456789";
+
+    final Uri zaloUri = Uri.parse("zalo://chat?phone=$phone");
+    final Uri webFallback = Uri.parse("https://zalo.me/$phone");
+
+    if (await canLaunchUrl(zaloUri)) {
+      await launchUrl(
+        zaloUri,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      await launchUrl(
+        webFallback,
+        mode: LaunchMode.externalApplication,
+      );
+    }
+  }
 }
