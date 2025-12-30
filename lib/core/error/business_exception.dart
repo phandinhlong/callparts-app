@@ -10,7 +10,7 @@ class BusinessException extends AppException {
     this.entity,
     super.code,
     super.details,
-  });
+  }) : super('');
 
   factory BusinessException.insufficientPermissions(String operation) {
     return BusinessException(

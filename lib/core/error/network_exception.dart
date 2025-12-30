@@ -10,7 +10,7 @@ class NetworkException extends AppException {
     super.details,
     this.statusCode,
     this.url,
-  });
+  }) : super('');
 
   factory NetworkException.fromStatusCode(int statusCode, {String? message}) {
     switch (statusCode) {

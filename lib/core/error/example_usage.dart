@@ -117,7 +117,7 @@ void main() async {
   final fetchResult = await service.fetchData();
   fetchResult.fold(
     onSuccess: (data) => print('Success: $data'),
-    onFailure: (error) => print('Error: ${error.message}'),
+    onFailure: (error) => print('Error: ${error?.message}'),
   );
 
   // Example 2: Create user with validation
@@ -148,4 +148,8 @@ void main() async {
   } catch (e) {
     service.handleOperationError(e);
   }
+}
+
+extension on Object? {
+  get message => null;
 }

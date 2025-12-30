@@ -10,7 +10,7 @@ class ValidationException extends AppException {
     required this.errors,
     super.code,
     super.details,
-  });
+  }) : super('');
 
   factory ValidationException.fieldRequired(String field) {
     return ValidationException(

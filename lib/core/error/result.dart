@@ -1,3 +1,5 @@
+import 'app_exception.dart';
+
 sealed class Result<T> {
   const Result();
 
